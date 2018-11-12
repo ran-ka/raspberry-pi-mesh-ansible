@@ -1,0 +1,52 @@
+---
+
+# enable DHCP
+# iptables -I INPUT -p udp --dport 67 -i net0 -j ACCEPT
+# iptables -I INPUT -p udp --dport 53 -s 192.168.123.0/24 -j ACCEPT
+# iptables -I INPUT -p tcp --dport 53 -s 192.168.123.0/24 -j ACCEPT
+- name: 'Install dnsmasq'
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - dnsmasq
+  tags: dhcp
+
+- name: Enable Iptables DHCP 1/3
+  iptables:
+    table: filter
+    chain: INPUT
+    jump: ACCEPT
+    in_interface: wlan0
+    protocol: udp
+    destination_port: 67
+  tags: dhcp
+
+- name: Enable Iptables DHCP 2/3
+  iptables:
+    table: filter
+    chain: INPUT
+    jump: ACCEPT
+    in_interface: wlan0
+    protocol: udp
+    destination_port: 53
+  tags: dhcp
+
+- name: Enable Iptables DHCP 3/3
+  iptables:
+    table: filter
+    chain: INPUT
+    jump: ACCEPT
+    in_interface: wlan0
+    protocol: tcp
+    destination_port: 53
+  tags: dhcp
+
+- name: DHCP | Configure /etc/dnsmasq.conf
+  template:
+    src:   dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: 0600
+  tags: dhcp

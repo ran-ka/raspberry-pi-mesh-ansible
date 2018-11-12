@@ -1,0 +1,30 @@
+---
+
+- name: 'Transfer init scripts'
+  become: yes
+  become_method: sudo
+  copy: src=./ dest=/home/pi/init/ mode=0755
+  tags: update
+
+- name: 'Thin out Raspbian'
+  become: yes
+  become_method: sudo
+  shell: /home/pi/init/anti-raspbian-bloat.sh
+  tags: update
+
+- apt: update_cache=yes
+  name: 'Update apt cache'
+  become: yes
+  become_method: sudo
+  tags: update
+
+- apt: upgrade=safe
+  name: 'Upgrade apt dist'
+  become: yes
+  become_method: sudo
+  tags: update
+
+- name: Update raspi-config
+  become: true
+  apt: name=raspi-config update_cache=yes state=present cache_valid_time=3600
+  tags: update

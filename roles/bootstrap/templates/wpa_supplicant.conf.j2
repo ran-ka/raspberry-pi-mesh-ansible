@@ -1,0 +1,20 @@
+#  {{ ansible_managed }}
+
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=GB
+
+network={
+	ssid="{{ raspi_wifi_ssid }}"
+	psk="{{ raspi_wifi_psk }}"
+	key_mgmt=WPA-PSK
+	id_str="home"
+}
+
+network={
+        ssid="{{ raspi_wifi_ssid_office }}"
+        psk="{{ raspi_wifi_psk_office }}"
+        key_mgmt=WPA-PSK
+        id_str="office"
+}
+

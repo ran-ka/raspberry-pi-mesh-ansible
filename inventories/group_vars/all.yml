@@ -1,0 +1,22 @@
+---
+
+# change pi user password to PI USER PASSWORD
+# ansible all -i localhost, -m debug -a "msg={{ '.....' | password_hash('sha512', 'mysecretsalt') }}"
+pi_password: "<A VERY LONG HASH>"
+
+# 'Wi-Fi Network' name
+# raspi_wifi_ssid: "{{ vault_raspi_wifi_ssid }}"
+raspi_wifi_ssid: <HOME SSID HERE>
+
+# 'Wi-Fi Network' password
+# raspi_wifi_psk: "{{ vault_raspi_wifi_psk }}"
+raspi_wifi_psk: <HOME PASSWORD HERE>
+
+# 'Wi-Fi Network' name
+# raspi_wifi_ssid: "{{ vault_raspi_wifi_ssid }}"
+raspi_wifi_ssid_office: <OFFICE SSID HERE>
+
+# 'Wi-Fi Network' password
+# raspi_wifi_psk: "{{ vault_raspi_wifi_psk }}"
+raspi_wifi_psk_office: <OFFICE PASSWORD HERE>
+

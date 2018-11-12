@@ -1,0 +1,56 @@
+---
+# Disable screen
+#- name: Configure options in /etc/rc.local.
+#  lineinfile:
+#    dest: /etc/rc.local
+#    regexp: "{{ item.regexp }}"
+#    line: "{{ item.line }}"
+#    insertbefore: "^exit"
+#    state: present
+#  with_items: "{{ raspberry_pi_rc_local_options }}"
+#  tags: config
+
+- name: raspi-config | Update hostname
+  command: raspi-config nonint do_hostname {{ raspberry_pi_hostname }}
+  tags: config
+
+# Enable VNC server.  '1' for disabled or '0' for enabled
+- name: raspi-config | VNC server
+  command: raspi-config nonint do_vnc 1
+  tags: config
+# Enable SSH server.  '1' for disabled or '0' for enabled
+# For almost all this situation, this should be set to enabled
+- name: raspi-config | SSH server
+  command: raspi-config nonint do_ssh 0
+  tags: config
+
+# Enable I2C bus '1' for disabled or '0' for enabled
+- name: raspi-config | Configure I2C bus support
+  command: raspi-config nonint do_i2c 0
+  tags: config
+
+# Enable SPI bus '1' for disabled or '0' for enabled
+- name: raspi-config | Configure SPI bus support
+  command: raspi-config nonint do_spi 1
+  tags: config
+
+# Boot behaviour
+#  B1 - Console - Text console, requiring user to login
+#  B2 - Console Autologin" "Text console, automatically logged in as 'pi' user
+#  B3 - Desktop" "Desktop GUI, requiring user to login"
+#  B4 - Desktop Autologin" "Desktop GUI, automatically logged in as 'pi' user"
+#  Set to one of {B1|B2|B3|B4}
+- name: raspi-config | Boot Behaviour
+  command: raspi-config nonint do_boot_behaviour B1
+  tags: config
+
+# Change Timezone
+- name: raspi-config | Change Timezone
+  command: raspi-config nonint do_change_timezone {{ raspberry_pi_config_timezone }}
+  tags: config
+
+- name: Expand filesystem to fill disk
+  command: raspi-config --expand-rootfs
+  become: yes
+  tags: config
+

@@ -1,0 +1,8 @@
+---
+raspberry_pi_config_timezone: UTC
+raspberry_pi_hostname: blockdox
+raspberry_pi_rc_local_options:
+  # Disable HDMI on startup (for power savings and security).
+  - regexp: "^/usr/bin/tvservice"
+    line: "/usr/bin/tvservice -o"
+

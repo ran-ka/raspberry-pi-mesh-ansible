@@ -1,0 +1,133 @@
+---
+- name: find interface facts
+  debug:
+    msg: "{{ hostvars[inventory_hostname]['ansible_wlan0'] }}"
+  tags: wifi
+
+- name: find interface facts
+  debug:
+    msg: "{{ hostvars[inventory_hostname]['ansible_wlan1'] }}"
+  tags: wifi
+
+- name: Wi-Fi | Configure wpa_supplicant
+  template:
+    src:   wpa_supplicant.conf.j2
+    dest: /etc/wpa_supplicant/wpa_supplicant.conf
+    owner: root
+    group: root
+    mode: 0600
+  tags: wifi
+
+- name: 'Install network manager'
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - network-manager
+    - network-manager-gnome
+    - openvpn
+    - openvpn-systemd-resolved
+    - network-manager-openvpn
+    - network-manager-openvpn-gnome
+    - iptables-persistent
+  tags: wifi
+
+- name: Wi-Fi | Configure NetworkManager.conf
+  template:
+    src:   NetworkManager.conf.j2
+    dest: /etc/NetworkManager/NetworkManager.conf
+    owner: root
+    group: root
+    mode: 0600
+  tags: wifi
+
+- name: Wi-Fi | Configure NetworkManagerOffice.conf
+  template:
+    src:   NetworkManagerOffice.conf.j2
+    dest: /etc/NetworkManager/system-connections/MyMesh
+    owner: root
+    group: root
+    mode: 0600
+  tags: wifi
+
+- name: Wi-Fi | Configure NetworkManagerHome.conf
+  template:
+    src:   NetworkManagerHome.conf.j2
+    dest: /etc/NetworkManager/system-connections/Home
+    owner: root
+    group: root
+    mode: 0600
+  tags: wifi
+
+- name: Wi-Fi | Configure NetworkManagerMesh.conf
+  template:
+    src:   NetworkManagerMesh.conf.j2
+    dest: /etc/NetworkManager/system-connections/Hotspot
+    owner: root
+    group: root
+    mode: 0600
+  tags: wifi
+
+- name: Remove unneeded packages
+  apt:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - openresolv
+    - dhcpcd5
+  tags: wifi
+
+- name: Create symbolic link for network manager
+  file:
+    src: "/lib/systemd/resolv.conf"
+    dest: "/etc/resolv.conf"
+    force: yes
+    state: link
+  tags: wifi
+
+# Set ip forwarding on in /proc and in the sysctl file and reload if necessary
+- sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+  tags: wifi
+
+# iptables -t nat -A POSTROUTING -o internet0 -j MASQUERADE
+# iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+# iptables -A FORWARD -i net0 -o internet0 -j ACCEPT
+
+- name: Create Iptables NAT chain 1/3
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    out_interface: wlan1
+    jump: MASQUERADE
+    protocol: all
+  tags: wifi
+
+- name: Create Iptables NAT chain 2/3
+  iptables:
+    table: filter
+    chain: FORWARD
+    in_interface: wlan1
+    out_interface: wlan0
+    match: [conntrack]
+    jump: ACCEPT
+    ctstate: [RELATED,ESTABLISHED]
+    protocol: all
+  tags: wifi
+
+- name: Create Iptables NAT chain 3/3
+  iptables:
+    table: filter
+    chain: FORWARD
+    in_interface: wlan0
+    out_interface: wlan1
+    match: [conntrack]
+    ctstate: [NEW]
+    jump: ACCEPT
+    protocol: all
+  tags: wifi
+

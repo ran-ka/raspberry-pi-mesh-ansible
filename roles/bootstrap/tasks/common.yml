@@ -1,0 +1,16 @@
+---
+- name: 'Install common packages'
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - rpi-update
+    - i2c-tools
+    - git
+    - git-core
+    - htop
+    - curl
+    - screen
+    - build-essential
+  tags:
+    - common

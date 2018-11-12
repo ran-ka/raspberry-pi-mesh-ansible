@@ -1,0 +1,31 @@
+---
+- name: Set authorized key for user pi copying it from current user
+  authorized_key:
+    user: pi
+    state: present
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+  tags: security
+
+- name: Set a new password for the default "pi" account
+  become: yes
+  user:
+    name: "pi"
+    password: "{{ pi_password }}"
+    update_password: always
+  tags: security
+
+- name: Disable SSH password authentication
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^PasswordAuthentication"
+    line: "PasswordAuthentication no"
+    state: present
+  tags: security
+
+- name: Improve SSH login performance
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^UseDNS"
+    line: "UseDNS=no"
+    state: present
+  tags: security

@@ -1,0 +1,28 @@
+[connection]
+id=Home
+uuid=1cb0584c-e820-427e-84f8-c18fd42ac32d
+type=wifi
+permissions=
+
+[device]
+wifi.scan-rand-mac-address=no
+
+[wifi]
+mac-address={{ hostvars[inventory_hostname]['ansible_wlan1']['macaddress']|upper }}
+mac-address-blacklist=
+mode=infrastructure
+ssid={{ raspi_wifi_ssid }}
+
+[wifi-security]
+auth-alg=open
+key-mgmt=wpa-psk
+psk={{ raspi_wifi_psk }}
+
+[ipv4]
+dns-search=
+method=auto
+
+[ipv6]
+addr-gen-mode=stable-privacy
+dns-search=
+method=auto
